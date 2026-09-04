@@ -1,0 +1,19 @@
+# Render 一键部署配置（https://render.com）
+# 放在仓库根目录即可生效：Render 创建 Web Service 时自动读取本文件，
+# 无需手动填构建/启动命令。
+services:
+  - type: web
+    name: today-plan
+    runtime: node
+    plan: free            # 免费档：15 分钟无访问休眠，磁盘重启会重置（演示用足够）
+    region: singapore     # 离国内最近的免费节点
+    buildCommand: npm install --include=dev && node scripts/init-env.cjs && npx prisma migrate deploy --schema=prisma_database/schema.prisma && npx prisma generate --schema=prisma_database/schema.prisma
+    startCommand: node src/server.js
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: DATABASE_URL
+        value: "file:./app.db"
+      - key: JWT_SECRET
+        generateValue: true   # Render 生成并长期保管随机密钥，服务重启后登录态不丢
